@@ -66,7 +66,6 @@
   // Add, remove, or reorder these however you like.
   var hints = [ 
     'try again.🤣',
-    'try again.🤣',
     'nice try.😂',
     'still no.😒',
     'that button is decorative.😊',
@@ -131,12 +130,12 @@
     noHint.textContent = hints[Math.min(dodgeCount - 1, hints.length - 1)];
   }
 
-  // Trigger the dodge on hover, click attempt, touch, and keyboard focus
-  // so there's no reliable way to actually press it.
-  noBtn.addEventListener('pointerenter', dodge);
+  // Trigger the dodge only on an actual press (mouse click or touch tap).
+  // pointerdown alone covers both mouse and touch, so no separate
+  // touchstart/pointerenter/focus listeners are needed -- adding them
+  // caused a single tap to fire multiple dodges (skipping hints) because
+  // touch input emits pointerenter, pointerdown, and touchstart in a row.
   noBtn.addEventListener('pointerdown', function (e) { e.preventDefault(); dodge(); });
-  noBtn.addEventListener('touchstart', function (e) { e.preventDefault(); dodge(); }, { passive: false });
-  noBtn.addEventListener('focus', dodge);
 
   // Keep it on screen if the window is resized while it's roaming.
   window.addEventListener('resize', function () {
