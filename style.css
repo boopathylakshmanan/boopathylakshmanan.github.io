@@ -1,0 +1,381 @@
+/* =========================================================
+   COLOR TOKENS
+   Change these variables to re-theme the whole page.
+   Light theme lives on :root. Dark theme overrides below.
+   ========================================================= */
+:root{
+  --bg: #fdf1f6;              /* page background (top) */
+  --bg-2: #ffe3ee;            /* page background (bottom glow) */
+  --ink: #3a0d2b;             /* main text color */
+  --ink-soft: #8a5a72;        /* secondary text color */
+
+  --pink: #e6007a;            /* the dark bright pink accent (Yes button) */
+  --pink-deep: #b3005c;       /* darker pink, used in the Yes gradient */
+  --pink-glow: rgba(230,0,122,.28);
+
+  --muted-fill: rgba(58,13,43,.05);   /* No button background */
+  --muted-border: rgba(58,13,43,.18); /* No button border */
+  --muted-ink: rgba(58,13,43,.38);    /* No button text */
+
+  --orb-a: rgba(230,0,122,.20);  /* background glow blobs */
+  --orb-b: rgba(179,0,92,.16);
+  --orb-c: rgba(255,214,232,.55);
+
+  --heart-a: #e6007a;          /* colors used for the little floating hearts */
+  --heart-b: #ff8fbd;
+  --heart-c: #b3005c;
+}
+
+/* Dark mode: kicks in automatically if the visitor's OS/browser prefers dark */
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #1b0916;
+    --bg-2: #2a0f22;
+    --ink: #ffe9f2;
+    --ink-soft: #d9a3bf;
+
+    --pink: #ff2f86;
+    --pink-deep: #ff5fa2;
+    --pink-glow: rgba(255,47,134,.38);
+
+    --muted-fill: rgba(255,233,242,.05);
+    --muted-border: rgba(255,233,242,.16);
+    --muted-ink: rgba(255,233,242,.30);
+
+    --orb-a: rgba(255,47,134,.28);
+    --orb-b: rgba(255,95,162,.14);
+    --orb-c: rgba(43,15,34,.6);
+
+    --heart-a: #ff2f86;
+    --heart-b: #ff8fbd;
+    --heart-c: #ffb6d5;
+  }
+}
+
+/* =========================================================
+   BASE / RESET
+   ========================================================= */
+*{ box-sizing: border-box; }
+
+html, body{ height: 100%; }
+
+body{
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh; /* dvh accounts for mobile browser address bars */
+  /* Most screens fit everything with no scrolling at all. On a short
+     phone (or once the longer "Yes" response text appears) this lets
+     the page scroll instead of clipping content. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--ink);
+  font-family: "Sora", ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg); /* plain fallback; the real wash lives on .bg below */
+}
+
+/* =========================================================
+   ANIMATED BACKGROUND
+   Three big blurred circles ("orbs") drift slowly.
+   Small heart shapes rise from the bottom like embers.
+
+   This whole layer is position:fixed + inset:0, so it is always sized
+   to exactly the current viewport -- not the page's scrollable height.
+   That's deliberate: once the page grows taller than one screen (e.g.
+   the long "Yes" response text), a background painted on <body> would
+   stretch across that whole tall box instead of covering what's
+   actually visible. Keeping the wash here means it always fills the
+   screen and stays put while the content scrolls.
+   ========================================================= */
+.bg{
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none; /* clicks pass through to the buttons */
+  background: radial-gradient(120% 140% at 50% -10%, var(--bg-2), var(--bg) 60%);
+  z-index: 0;
+}
+
+.orb{
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  will-change: transform;
+}
+.orb-1{
+  width: 52vmax; height: 52vmax; left: -18vmax; top: -20vmax;
+  background: radial-gradient(circle at 35% 35%, var(--orb-a), transparent 70%);
+  animation: drift1 26s ease-in-out infinite alternate;
+}
+.orb-2{
+  width: 44vmax; height: 44vmax; right: -16vmax; bottom: -18vmax;
+  background: radial-gradient(circle at 60% 60%, var(--orb-b), transparent 70%);
+  animation: drift2 32s ease-in-out infinite alternate;
+}
+.orb-3{
+  width: 30vmax; height: 30vmax; right: 8vmax; top: -10vmax;
+  background: radial-gradient(circle, var(--orb-c), transparent 72%);
+  animation: drift3 22s ease-in-out infinite alternate;
+}
+@keyframes drift1{ to{ transform: translate(6vmax, 8vmax) scale(1.08); } }
+@keyframes drift2{ to{ transform: translate(-7vmax, -6vmax) scale(1.1); } }
+@keyframes drift3{ to{ transform: translate(-4vmax, 6vmax) scale(0.94); } }
+
+/* Individual floating hearts. Shape is made from a square + two circles,
+   no images or emoji needed. Each heart's size/position/speed is set
+   inline by script.js when it creates them. */
+.heart{
+  position: absolute;
+  bottom: -6vh;
+  width: 16px; height: 16px;
+  transform: rotate(-45deg);
+  opacity: .65;
+  animation-name: rise;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+.heart::before, .heart::after{
+  content: "";
+  position: absolute;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: inherit;
+}
+.heart::before{ top: -50%; left: 0; }
+.heart::after{ left: 50%; top: 0; }
+
+@keyframes rise{
+  0%   { transform: translate(0,0) rotate(-45deg); opacity: 0; }
+  12%  { opacity: .7; }
+  50%  { transform: translate(2vw,-55vh) rotate(-45deg); }
+  88%  { opacity: .5; }
+  100% { transform: translate(-2vw,-108vh) rotate(-45deg); opacity: 0; }
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+main.stage{
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(20px, 6vh, 48px) clamp(16px, 6vw, 48px);
+}
+
+/* --- Small photo slot, above the eyebrow ---
+   Starts as a square placeholder. Once script.js confirms the real image
+   has loaded, it adds .has-photo, which drops the forced square so the
+   frame takes the image's own aspect ratio instead (still capped small
+   by max-width, never forced into a square crop). */
+.photo-frame{
+  position: relative;
+  width: clamp(64px, 20vw, 100px);
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: clamp(16px, 4vh, 28px);
+  border: 2px solid var(--pink-glow);
+  box-shadow: 0 8px 24px -8px var(--pink-glow);
+  background: var(--muted-fill);
+}
+.photo-frame.has-photo{
+  width: auto;
+  max-width: clamp(84px, 26vw, 132px);
+  aspect-ratio: auto;
+}
+.photo-img{
+  display: none; /* script.js reveals this once the image actually loads */
+  width: 100%;
+  height: 100%;
+  max-height: 40vh;
+  object-fit: cover;
+}
+.photo-frame.has-photo .photo-img{
+  display: block;
+  height: auto;
+}
+.photo-placeholder{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.photo-frame.has-photo .photo-placeholder{
+  display: none;
+}
+.photo-heart{
+  width: 14px; height: 14px;
+  transform: rotate(-45deg);
+  position: relative;
+  background: var(--ink-soft);
+  opacity: .5;
+}
+.photo-heart::before, .photo-heart::after{
+  content: "";
+  position: absolute;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: inherit;
+}
+.photo-heart::before{ top: -50%; left: 0; }
+.photo-heart::after{ left: 50%; top: 0; }
+.photo-label{
+  font-size: .55rem;
+  letter-spacing: .04em;
+  color: var(--ink-soft);
+  opacity: .6;
+}
+
+.eyebrow{
+  margin: 0 0 14px;
+  font-size: 12px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+h1.headline{
+  margin: 0;
+  font-family: "Fraunces", Georgia, serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(1.9rem, 7vw, 4.4rem);
+  line-height: 1.08;
+  max-width: 16ch;
+  text-wrap: balance;
+  letter-spacing: -.01em;
+}
+h1.headline .accent{
+  font-style: italic;
+  font-weight: 500;
+  color: var(--pink);
+}
+
+p.sub{
+  margin: 18px 0 0;
+  color: var(--ink-soft);
+  font-size: clamp(.95rem, 1.4vw, 1.1rem);
+  max-width: 42ch;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+.actions{
+  margin-top: clamp(28px, 6vh, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(40px, 10vw, 96px);
+  flex-wrap: wrap;
+}
+
+button{
+  font-family: inherit;
+  cursor: pointer;
+}
+button:focus-visible{
+  outline: 2px solid var(--pink);
+  outline-offset: 3px;
+}
+
+/* --- YES: big, filled, glowing, grows slightly every time No dodges --- */
+.btn-yes{
+  --scale: 1; /* script.js increases this over time */
+  border: none;
+  border-radius: 999px;
+  padding: 16px 42px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+  box-shadow: 0 10px 30px -6px var(--pink-glow), 0 2px 0 rgba(0,0,0,.05) inset;
+  transform: scale(var(--scale));
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
+}
+.btn-yes:hover{
+  box-shadow: 0 14px 38px -6px var(--pink-glow), 0 2px 0 rgba(0,0,0,.05) inset;
+}
+.btn-yes:active{
+  transform: scale(calc(var(--scale) * .96));
+}
+
+/* --- NO: small, faint outline, deliberately unappealing --- */
+.no-zone{
+  position: relative;
+}
+.btn-no{
+  border: 1px solid var(--muted-border);
+  background: var(--muted-fill);
+  color: var(--muted-ink);
+  border-radius: 999px;
+  padding: 9px 22px;
+  font-size: .82rem;
+  font-weight: 500;
+  transition: left .32s ease, top .32s ease, opacity .2s ease;
+}
+/* Once script.js switches it to "roaming" mode it becomes position:fixed
+   so it can jump anywhere on screen. It gets an opaque backdrop + stronger
+   border/text here so it stays legible even when it lands on top of the
+   headline, hearts, or glow orbs -- still small and plain, just visible. */
+.btn-no.roaming{
+  position: fixed;
+  z-index: 5;
+  background: var(--bg);
+  border-color: var(--ink-soft);
+  color: var(--ink-soft);
+  box-shadow: 0 6px 20px rgba(0,0,0,.18);
+}
+
+.no-hint{
+  margin-top: 16px;
+  min-height: 1.4em;
+  max-width: 34ch;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: .95rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* When the page is "answered" (Yes was clicked), hide the photo/buttons/hint */
+.stage.answered .photo-frame,
+.stage.answered .actions,
+.stage.answered .no-hint{
+  display: none;
+}
+
+.seal{
+  margin-top: 30px;
+  font-size: .78rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  opacity: 0;
+  animation: fadein .6s ease .15s forwards;
+}
+@keyframes fadein{ to{ opacity: 1; } }
+
+/* Little heart particles spawned on click for the celebration burst */
+.burst{
+  position: fixed;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* Turn off motion for anyone who has asked their OS to reduce it */
+@media (prefers-reduced-motion: reduce){
+  .orb, .heart{ animation: none !important; }
+  .btn-no{ transition: none; }
+}

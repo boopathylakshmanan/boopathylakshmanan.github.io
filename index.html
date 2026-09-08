@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Will You Be My New Dream?</title>
+
+  <!-- Google Fonts: Fraunces for the big romantic headline, Sora for everything else -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500;1,9..144,600&family=Sora:wght@400;500;600;700&display=swap">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Decorative background: glowing orbs + rising hearts. Purely visual, screen readers should skip it -->
+  <div class="bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div id="heartField"></div>
+  </div>
+
+  <main class="stage" id="stage">
+    <!-- Small photo slot, sized to whatever image is dropped into assets/.
+         Swap the file and update the src below to change the picture --
+         until the file loads, the placeholder shows instead. -->
+    <div class="photo-frame" id="photoFrame">
+      <img class="photo-img" id="photoImg" src="assets/IMG_20250810_084316_634.webp" alt="A photo of the two of you">
+      <div class="photo-placeholder" id="photoPlaceholder">
+        <span class="photo-heart"></span>
+        <span class="photo-label">add a photo</span>
+      </div>
+    </div>
+
+    <p class="eyebrow" id="eyebrow">a question, just for you</p>
+    <h1 class="headline" id="headline">Will you be my <span class="accent">NEW DREAM</span>?</h1>
+    <p class="sub" id="subtext">One tap. That's the whole ask.</p>
+
+    <div class="actions" id="actions">
+      <button class="btn-yes" id="yesBtn" style="--scale:1">Yes</button>
+      <div class="no-zone" id="noZone">
+        <button class="btn-no" id="noBtn">No</button>
+      </div>
+    </div>
+
+    <!-- Shows the "nice try" style captions each time the No button dodges -->
+    <p class="no-hint" id="noHint">&nbsp;</p>
+
+    <!-- Hidden until Yes is clicked, then shows the sealed date -->
+    <p class="seal" id="seal" style="display:none;"></p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
