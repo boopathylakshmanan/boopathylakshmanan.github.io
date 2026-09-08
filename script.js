@@ -64,7 +64,8 @@
 
   // Captions shown under the No button each time it dodges.
   // Add, remove, or reorder these however you like.
-  var hints = [
+  var hints = [ 
+    'try again.🤣',
     'try again.🤣',
     'nice try.😂',
     'still no.😒',
